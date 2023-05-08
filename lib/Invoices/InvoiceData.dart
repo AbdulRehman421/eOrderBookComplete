@@ -1,4 +1,5 @@
 import 'package:hive/hive.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../Area & Sector/Area.dart';
@@ -35,6 +36,7 @@ class MyData {
   Area area=Area(-1, -1, "", -1);
   Sector sector=Sector(-1, -1, "scName");
   String? partyCode="";
+  String? actype = "";
 
   @override
   String toString() {
@@ -131,7 +133,7 @@ class MyData {
     print(productM);
     return {"prod":productM};
   }*/
-  Map<String, dynamic> toMap(current) {
+  Map<String, dynamic> toMap(current, actype) {
 
     Map<String, dynamic> newMap = {};
 
@@ -139,7 +141,7 @@ class MyData {
     for (var i = 0; i < products.length; i++) {
       // Create a new key in the format "23040001 - i" and assign the product object to it
       var newKey = "$current - $time - $i - ${DateTime.now().microsecondsSinceEpoch}";
-      newMap[newKey] = products[i].toMap(partyCode);
+      newMap[newKey] = products[i].toMap(partyCode, actype);
     }
     print(newMap);
     return newMap;

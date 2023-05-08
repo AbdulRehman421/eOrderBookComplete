@@ -72,7 +72,7 @@ class Product {
     return total;
   }
 
-  Map<String, dynamic> toMap(String? partyCode) {
+  Map<String, dynamic> toMap(String? partyCode, String? username) {
     return {
       'Pcode': sku,
       'bns': bonus,
@@ -80,6 +80,7 @@ class Product {
       'qty': quantity,
       'dis': discount,
       'Ccode': partyCode,
+      'username': username
     };
   }
   Map<String, dynamic> toSqlMap() {

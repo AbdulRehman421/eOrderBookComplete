@@ -1,9 +1,11 @@
 import 'package:Mini_Bill/Customer/Customer.dart';
+import 'package:Mini_Bill/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 
 class ShowCust extends StatefulWidget {
-  const ShowCust({Key? key}) : super(key: key);
+  final User user;
+  const ShowCust({Key? key, required this.user}) : super(key: key);
 
   @override
   State<ShowCust> createState() => _ShowCustState();
@@ -37,11 +39,16 @@ class _ShowCustState extends State<ShowCust> {
     final Database database = await openDatabase('my_database.db');
 
     List<Map<String, dynamic>> parties =
-    await database.query('Parties', limit: limit, offset: offset);
+        await database.query('Parties', limit: limit, offset: offset);
 
     parties.forEach((customer) {
-      fetchd.add(Customer(customer['dsc'], "${customer['Address']}",
-          "${customer['Phone']}", "", "${customer['_id']}","${customer['AreaCd']}"));
+      fetchd.add(Customer(
+          customer['dsc'],
+          "${customer['Address']}",
+          "${customer['Phone']}",
+          "",
+          "${customer['_id']}",
+          "${customer['AreaCd']}"));
     });
     return fetchd;
   }
@@ -51,7 +58,6 @@ class _ShowCustState extends State<ShowCust> {
     setState(() {});
   }
 
-
   @override
   void initState() {
     super.initState();
@@ -59,27 +65,43 @@ class _ShowCustState extends State<ShowCust> {
     _scrollController.addListener(_onScroll);
   }
 
-
   @override
   void dispose() {
     _scrollController.dispose();
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ListView.builder(
-        itemCount: items.length,
-        controller: _scrollController,
-        itemBuilder: (BuildContext context, int index) {
-          final item = items[index];
-          return ListTile(
-            title: Text(item.name), subtitle: Text(item.address),
-            // ... other widget properties
-          );
-        },
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              Text(
+                widget.user.username,
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 20),
+              ListView.builder(
+                itemCount: items.length,
+                shrinkWrap: true,
+                primary: false,
+                controller: _scrollController,
+                itemBuilder: (BuildContext context, int index) {
+                  final item = items[index];
+                  return ListTile(
+                    title: Text(item.name), subtitle: Text(item.address),
+                    // ... other widget properties
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

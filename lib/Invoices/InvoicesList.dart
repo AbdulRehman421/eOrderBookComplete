@@ -3,12 +3,14 @@ import 'package:Mini_Bill/Invoices/InvoiceData.dart';
 import 'package:Mini_Bill/Invoices/invoice.dart';
 import 'package:Mini_Bill/Products/ReSelectProducts.dart';
 import 'package:Mini_Bill/Widgets/ConstantWidget.dart';
+import 'package:Mini_Bill/login/login_view.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hive/hive.dart';
 import 'package:lottie/lottie.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sn_progress_dialog/sn_progress_dialog.dart';
 
 import '../Area & Sector/Area.dart';
@@ -19,9 +21,12 @@ import '../Extra/Shop.dart';
 import '../Products/Product.dart';
 import '../Utils/db.dart';
 import '../main.dart';
+import '../models/user_model.dart';
 
 class InvoiceList extends StatefulWidget {
-  const InvoiceList({Key? key}) : super(key: key);
+
+
+  const InvoiceList( {Key? key}) : super(key: key);
 
   @override
   _InvoiceListState createState() => _InvoiceListState();
@@ -92,6 +97,21 @@ class _InvoiceListState extends State<InvoiceList> with RouteAware {
           title: const Text("Mini Order Book"),
           actions: [
             IconButton(
+                onPressed: () async {
+                  bool confirmDelete =
+                  await showDeleteConfirmationDialog(context);
+                  if (confirmDelete) {
+                    // Perform delete action
+                    deleteAll();
+                  } else {
+                    // Cancel delete action
+                  }
+                },
+                icon: Icon(
+                  Icons.delete_sharp,
+                  color: Colors.redAccent,
+                )),
+            IconButton(
               icon: Icon(Icons.sync),
               onPressed: () {
                 getData();
@@ -140,8 +160,11 @@ class _InvoiceListState extends State<InvoiceList> with RouteAware {
                         FirebaseDatabase.instance.reference().child("orders");
                     for (MyData customer in myDataList) {
                       try {
+                        var sharedPrefs = await SharedPreferences.getInstance();
+                        var username = sharedPrefs.getString('username');
+
                         await customer.setSectorArea();
-                        ordersMap.addAll(customer.toMap(current));
+                        ordersMap.addAll(customer.toMap(current, username));
                       } catch (e) {
                         print(e);
                       }
@@ -178,19 +201,11 @@ class _InvoiceListState extends State<InvoiceList> with RouteAware {
                 icon: const Icon(Icons.send_sharp)),
           ],
           leading: IconButton(
-              onPressed: () async {
-                bool confirmDelete =
-                    await showDeleteConfirmationDialog(context);
-                if (confirmDelete) {
-                  // Perform delete action
-                  deleteAll();
-                } else {
-                  // Cancel delete action
-                }
+              onPressed: ()  {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => LoginView(),));
               },
               icon: Icon(
-                Icons.delete_sharp,
-                color: Colors.redAccent,
+                Icons.login,
               )),
         ),
         body: Stack(
@@ -746,55 +761,59 @@ class _InvoiceListState extends State<InvoiceList> with RouteAware {
                                           : myDataList.length),
                           // Column(
                           //   children: [
-                          //     // Padding(
-                          //     //   padding: const EdgeInsets.symmetric(horizontal: 36.0),
-                          //     //   child: ElevatedButton(
-                          //     //       onPressed: () async {
-                          //     //         // "Sector: ${info[0]["SecNm"]} Area: ${info[0]["AreaNm"];
-                          //     //         bool confirmDelete = await showSendConfirmationDialog(context);
-                          //     //         if (confirmDelete) {
-                          //     //           showLoaderDialog(context, "Sending data to server", "Please wait");
-                          //     //           DatabaseReference ref =
-                          //     //           FirebaseDatabase.instance.ref("orders");
-                          //     //
-                          //     //           Map<String, dynamic> ordersMap = {};
-                          //     //
-                          //     //           for (MyData customer in myDataList) {
-                          //     //             ordersMap["ORDER - ${customer.time}"] = customer.toMap();
-                          //     //           }
-                          //     //           await ref.set(ordersMap).then((value) {
-                          //     //             // Data was successfully set
-                          //     //             print("Data set successfully");
-                          //     //             Navigator.pop(context);
-                          //     //             Fluttertoast.showToast(
-                          //     //                 msg: "Data sent to server",
-                          //     //                 toastLength: Toast.LENGTH_SHORT,
-                          //     //                 gravity: ToastGravity.BOTTOM,
-                          //     //                 timeInSecForIosWeb: 1,
-                          //     //                 backgroundColor: Colors.grey[600],
-                          //     //                 textColor: Colors.white,
-                          //     //                 fontSize: 16.0
-                          //     //             );
-                          //     //           }).catchError((error) {
-                          //     //             // Handle the error
-                          //     //             Navigator.pop(context);
-                          //     //             print("Error setting data: " + error.message);
-                          //     //             Fluttertoast.showToast(
-                          //     //                 msg: "Error setting data: " + error.message,
-                          //     //                 toastLength: Toast.LENGTH_SHORT,
-                          //     //                 gravity: ToastGravity.BOTTOM,
-                          //     //                 timeInSecForIosWeb: 1,
-                          //     //                 backgroundColor: Colors.grey[600],
-                          //     //                 textColor: Colors.white,
-                          //     //                 fontSize: 16.0
-                          //     //             );
-                          //     //           });
-                          //     //
-                          //     //         }
-                          //     //
-                          //     //       },
-                          //     //       child: const Text("Send all data")),
-                          //     // ),
+                          //     Padding(
+                          //       padding: const EdgeInsets.symmetric(horizontal: 36.0),
+                          //       child: ElevatedButton(
+                          //           onPressed: () async {
+                          //             // "Sector: ${info[0]["SecNm"]} Area: ${info[0]["AreaNm"];
+                          //             bool confirmDelete = await showSendConfirmationDialog(context);
+                          //             if (confirmDelete) {
+                          //               showLoaderDialog(context, "Sending data to server", "Please wait");
+                          //               var sharedPrefs = await SharedPreferences.getInstance();
+                          //               var username = sharedPrefs.getString('username');
+                          //
+                          //               DatabaseReference ref =
+                          //               FirebaseDatabase.instance.ref("orders");
+                          //
+                          //               Map<String, dynamic> ordersMap = {};
+                          //
+                          //               for (MyData customer in myDataList) {
+                          //                 ordersMap = customer.toMap(myDataList.length, username);
+                          //               }
+                          //
+                          //               await ref.set(ordersMap).then((value) {
+                          //                 // Data was successfully set
+                          //                 print("Data set successfully");
+                          //                 Navigator.pop(context);
+                          //                 Fluttertoast.showToast(
+                          //                     msg: "Data sent to server",
+                          //                     toastLength: Toast.LENGTH_SHORT,
+                          //                     gravity: ToastGravity.BOTTOM,
+                          //                     timeInSecForIosWeb: 1,
+                          //                     backgroundColor: Colors.grey[600],
+                          //                     textColor: Colors.white,
+                          //                     fontSize: 16.0
+                          //                 );
+                          //               }).catchError((error) {
+                          //                 // Handle the error
+                          //                 Navigator.pop(context);
+                          //                 print("Error setting data: " + error.message);
+                          //                 Fluttertoast.showToast(
+                          //                     msg: "Error setting data: " + error.message,
+                          //                     toastLength: Toast.LENGTH_SHORT,
+                          //                     gravity: ToastGravity.BOTTOM,
+                          //                     timeInSecForIosWeb: 1,
+                          //                     backgroundColor: Colors.grey[600],
+                          //                     textColor: Colors.white,
+                          //                     fontSize: 16.0
+                          //                 );
+                          //               });
+                          //
+                          //             }
+                          //
+                          //           },
+                          //           child: const Text("Send all data")),
+                          //     ),
                           //     const SizedBox(height: 12),
                           //     Padding(
                           //       padding: const EdgeInsets.symmetric(horizontal: 36.0),
@@ -817,7 +836,7 @@ class _InvoiceListState extends State<InvoiceList> with RouteAware {
                           //             backgroundColor: Colors.red,
                           //           )),
                           //     ),
-                          //     const SizedBox(height: 100)
+                          //     // const SizedBox(height: 100)
                           //   ],
                           // ),
                           const SizedBox(

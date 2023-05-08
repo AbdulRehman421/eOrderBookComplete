@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:Mini_Bill/Customer/Customer.dart';
 import 'package:Mini_Bill/Invoices/InvoiceData.dart';
 import 'package:Mini_Bill/Invoices/InvoicesList.dart';
@@ -10,6 +9,7 @@ import 'package:Mini_Bill/Utils/Utils.dart';
 import 'package:Mini_Bill/Utils/db.dart';
 import 'package:Mini_Bill/Widgets/ConstantWidget.dart';
 import 'package:Mini_Bill/Widgets/screen_size.dart';
+import 'package:Mini_Bill/login/login_view.dart';
 import 'package:autocomplete_textfield_ns/autocomplete_textfield_ns.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -23,7 +23,6 @@ import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
-
 import 'Customer/Customer.g.dart';
 import 'Extra/SelectShop.dart';
 import 'Extra/Shop.dart';
@@ -67,8 +66,10 @@ void main() async {
 
   await waitScreenSizeAvailable();
   runApp(MaterialApp(
-    home: const InvoiceList(),
-    title: "MiniPos",
+    home: const LoginView(),
+    routes: <String, WidgetBuilder>{
+    },
+    title: "eOrderBook",
     navigatorObservers: [routeObserver],
   ));
 }

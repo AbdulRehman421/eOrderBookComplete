@@ -33,6 +33,8 @@ dependencies:
   firebase_database: ^10.0.16
   sn_progress_dialog : ^1.1.3
   cupertino_icons: ^1.0.2
+  stacked: ^3.2.3
+  stacked_services: ^1.0.2
 
 
 dev_dependencies:
